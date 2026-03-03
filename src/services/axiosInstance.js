@@ -2,7 +2,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://falahiyya-result-backend.onrender.com',
+  baseURL: import.meta.env.VITE_API_URL || 'https://falahiyya-result-backend.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
