@@ -804,7 +804,7 @@ const ResultDetails = () => {
             <h2 className="text-sm md:text-xl font-medium text-gray-700 mb-1">AL MADRASSATHUL FALAHIYYA KALARUNDI</h2>
             <p className="text-xs md:text-sm text-gray-500">Kalarundi, Valiyaparamba P.O | SKIMV Board | Reg No: 10610</p>
             <div className="mt-2 pt-2 border-t border-gray-100">
-              <p className="text-xs md:text-sm font-medium text-gray-700">Annual Examination Result 2024-2025</p>
+              <p className="text-xs md:text-sm font-medium text-gray-700">Annual Examination Result 2025-2026</p>
             </div>
           </div>
 

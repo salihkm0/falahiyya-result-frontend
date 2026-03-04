@@ -306,7 +306,7 @@ const ResultMain = () => {
             {/* Exam Title */}
             <div className="mt-2 sm:mt-3 md:mt-4 pt-2 sm:pt-3 md:pt-4 border-t border-gray-100">
               <p className="text-sm sm:text-base md:text-lg font-medium text-gray-700">
-                Annual Examination Result 2024-2025
+                Annual Examination Result 2025-2026
               </p>
             </div>
           </div>
