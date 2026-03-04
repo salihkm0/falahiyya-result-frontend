@@ -63,7 +63,7 @@ const LoadingScreen = () => {
   );
 };
 
-// Topper Card Component - Improved for mobile
+// Topper Card Component - Shows guardian name instead of roll number
 const TopperCard = ({ student, rank }) => {
   const rankColors = {
     1: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", medal: "🥇" },
@@ -104,10 +104,12 @@ const TopperCard = ({ student, rank }) => {
             </div>
           </div>
 
-          {/* Info */}
+          {/* Info - Now showing guardian name instead of roll number */}
           <div className="flex-1 min-w-0">
             <h3 className="text-xs sm:text-sm font-medium text-gray-900 truncate">{student.name}</h3>
-            <p className="text-[10px] sm:text-xs text-gray-500">Roll: {student.rollNo}</p>
+            <p className="text-[10px] sm:text-xs text-gray-500 truncate">
+              Guardian: {student.guardian || "N/A"}
+            </p>
             
             {/* Marks */}
             <div className="flex items-center gap-1 sm:gap-2 mt-0.5 sm:mt-1">
@@ -190,66 +192,67 @@ const ResultMain = () => {
     }
   };
 
-  const fetchAllToppers = async (classList) => {
-    const toppersData = {};
-    
-    // Use the provided classList or fallback to state
-    const classesToProcess = classList || classes;
-    
-    if (!classesToProcess || classesToProcess.length === 0) {
-      console.log("No classes to process for toppers");
-      return;
+ const fetchAllToppers = async (classList) => {
+  const toppersData = {};
+  
+  // Use the provided classList or fallback to state
+  const classesToProcess = classList || classes;
+  
+  if (!classesToProcess || classesToProcess.length === 0) {
+    console.log("No classes to process for toppers");
+    return;
+  }
+  
+  for (const cls of classesToProcess) {
+    try {
+      setClassLoading(prev => ({ ...prev, [cls._id]: true }));
+      
+      const examsRes = await examAPI.getByClass(cls._id);
+      const exams = examsRes.data || [];
+      
+      const studentMarks = {};
+      
+      exams.forEach(exam => {
+        const studentId = exam.studentId?._id || exam.studentId;
+        if (!studentId) return;
+        
+        if (!studentMarks[studentId]) {
+          studentMarks[studentId] = {
+            studentId,
+            name: exam.studentId?.name || "Unknown",
+            rollNo: exam.studentId?.rollNo || "N/A",
+            guardian: exam.studentId?.guardian || "N/A", // Add guardian field
+            image: exam.studentId?.image,
+            totalObtained: 0,
+            totalMarks: 0,
+          };
+        }
+        
+        studentMarks[studentId].totalObtained += exam.marks?.obtainedMark || 0;
+        studentMarks[studentId].totalMarks += exam.marks?.totalMark || 0;
+      });
+      
+      const studentsList = Object.values(studentMarks).map(student => ({
+        ...student,
+        percentage: student.totalMarks > 0 
+          ? ((student.totalObtained / student.totalMarks) * 100).toFixed(2)
+          : 0
+      }));
+      
+      // Sort by total marks (descending) for toppers
+      studentsList.sort((a, b) => b.totalObtained - a.totalObtained);
+      toppersData[cls._id] = studentsList.slice(0, 3);
+      
+    } catch (error) {
+      console.error(`Error fetching toppers for class ${cls.classNumber}:`, error);
+      toppersData[cls._id] = [];
+    } finally {
+      setClassLoading(prev => ({ ...prev, [cls._id]: false }));
     }
-    
-    for (const cls of classesToProcess) {
-      try {
-        setClassLoading(prev => ({ ...prev, [cls._id]: true }));
-        
-        const examsRes = await examAPI.getByClass(cls._id);
-        const exams = examsRes.data || [];
-        
-        const studentMarks = {};
-        
-        exams.forEach(exam => {
-          const studentId = exam.studentId?._id || exam.studentId;
-          if (!studentId) return;
-          
-          if (!studentMarks[studentId]) {
-            studentMarks[studentId] = {
-              studentId,
-              name: exam.studentId?.name || "Unknown",
-              rollNo: exam.studentId?.rollNo || "N/A",
-              image: exam.studentId?.image,
-              totalObtained: 0,
-              totalMarks: 0,
-            };
-          }
-          
-          studentMarks[studentId].totalObtained += exam.marks?.obtainedMark || 0;
-          studentMarks[studentId].totalMarks += exam.marks?.totalMark || 0;
-        });
-        
-        const studentsList = Object.values(studentMarks).map(student => ({
-          ...student,
-          percentage: student.totalMarks > 0 
-            ? ((student.totalObtained / student.totalMarks) * 100).toFixed(2)
-            : 0
-        }));
-        
-        // Sort by total marks (descending) for toppers
-        studentsList.sort((a, b) => b.totalObtained - a.totalObtained);
-        toppersData[cls._id] = studentsList.slice(0, 3);
-        
-      } catch (error) {
-        console.error(`Error fetching toppers for class ${cls.classNumber}:`, error);
-        toppersData[cls._id] = [];
-      } finally {
-        setClassLoading(prev => ({ ...prev, [cls._id]: false }));
-      }
-    }
-    
-    setToppers(toppersData);
-  };
+  }
+  
+  setToppers(toppersData);
+};
 
   const onSubmit = async (data) => {
     if (!data.phone || !data.class) {
