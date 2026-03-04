@@ -754,7 +754,7 @@ const ResultDetails = () => {
             <span className="hidden sm:inline">Back</span>
           </Button>
           
-          <div className="flex gap-1 md:gap-2">
+          {/* <div className="flex gap-1 md:gap-2">
             <Button
               onClick={downloadImage}
               disabled={downloadingImage}
@@ -793,7 +793,7 @@ const ResultDetails = () => {
             >
               <Printer className="w-3.5 h-3.5 md:w-4 md:h-4" />
             </Button>
-          </div>
+          </div> */}
         </div>
 
         {/* Main Result Content */}

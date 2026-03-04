@@ -20,6 +20,49 @@ import {
 } from "../../components/ui/select";
 import toast from "react-hot-toast";
 
+// Professional Loading Screen Component
+const LoadingScreen = () => {
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="max-w-md w-full">
+        {/* Simple Logo/Icon */}
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto">
+            <Award className="w-8 h-8 text-gray-600" />
+          </div>
+        </div>
+
+        {/* Loading Text */}
+        <div className="text-center mb-4">
+          <h2 className="text-base font-medium text-gray-700 mb-1">
+            Loading Result Board
+          </h2>
+          <p className="text-xs text-gray-500">
+            Please wait while we prepare the data
+          </p>
+        </div>
+
+        {/* Simple Spinner */}
+        <div className="flex justify-center mb-4">
+          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+        </div>
+
+        {/* Progress Bar - Minimal */}
+        <div className="w-full bg-gray-100 h-1 rounded-full overflow-hidden">
+          <div className="bg-gray-400 h-1 rounded-full animate-pulse"></div>
+        </div>
+
+        {/* Loading Steps - Optional */}
+        <div className="mt-4 text-center">
+          <p className="text-xs text-gray-400">
+            Fetching classes and toppers data...
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Topper Card Component - Improved for mobile
 const TopperCard = ({ student, rank }) => {
   const rankColors = {
@@ -34,13 +77,13 @@ const TopperCard = ({ student, rank }) => {
     <div className={`${color.bg} rounded-lg border ${color.border} overflow-hidden hover:shadow-md transition-shadow`}>
       <div className="p-3 sm:p-4">
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Rank Badge - More prominent on mobile */}
+          {/* Rank Badge */}
           <div className="flex flex-col items-center justify-center min-w-[40px] sm:min-w-[48px]">
             <span className="text-xl sm:text-2xl">{color.medal}</span>
             <span className={`text-[10px] sm:text-xs font-medium ${color.text}`}>#{rank}</span>
           </div>
 
-          {/* Avatar - Smaller on mobile */}
+          {/* Avatar */}
           <div className="relative">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white flex items-center justify-center border-2 border-white shadow-sm">
               {student.image ? (
@@ -61,12 +104,12 @@ const TopperCard = ({ student, rank }) => {
             </div>
           </div>
 
-          {/* Info - Compact on mobile */}
+          {/* Info */}
           <div className="flex-1 min-w-0">
             <h3 className="text-xs sm:text-sm font-medium text-gray-900 truncate">{student.name}</h3>
             <p className="text-[10px] sm:text-xs text-gray-500">Roll: {student.rollNo}</p>
             
-            {/* Marks - Compact display */}
+            {/* Marks */}
             <div className="flex items-center gap-1 sm:gap-2 mt-0.5 sm:mt-1">
               <span className="text-[10px] sm:text-xs font-medium text-gray-700">
                 {student.totalObtained || 0}/{student.totalMarks || 0}
@@ -78,7 +121,7 @@ const TopperCard = ({ student, rank }) => {
             </div>
           </div>
 
-          {/* Chevron for touch feedback */}
+          {/* Chevron */}
           <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
         </div>
       </div>
@@ -91,19 +134,36 @@ const ResultMain = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [toppers, setToppers] = useState({});
   const [classLoading, setClassLoading] = useState({});
+  const [pageLoading, setPageLoading] = useState(true);
   const navigate = useNavigate();
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm();
 
   useEffect(() => {
-    fetchClasses();
-  }, []);
+    const loadData = async () => {
+      try {
+        // Fetch classes first
+        const classesData = await fetchClasses();
+        
+        // Then fetch toppers using the fetched classes
+        if (classesData && classesData.length > 0) {
+          await fetchAllToppers(classesData);
+        }
+        
+        // Small delay for smooth transition
+        setTimeout(() => {
+          setPageLoading(false);
+        }, 500);
+        
+      } catch (error) {
+        console.error("Error loading data:", error);
+        toast.error("Failed to load data");
+        setPageLoading(false);
+      }
+    };
 
-  useEffect(() => {
-    if (classes.length > 0) {
-      fetchAllToppers();
-    }
-  }, [classes]);
+    loadData();
+  }, []);
 
   const fetchClasses = async () => {
     try {
@@ -112,28 +172,36 @@ const ResultMain = () => {
       // Filter out classes 5A and 7A
       const filteredClasses = (response.data || [])
         .filter(cls => {
-          // Check if classNumber is "5 A" or "7 A" (with or without space)
           const classStr = `${cls.classNumber} ${cls.section || ''}`.trim();
           return !['5 A', '5A', '7 A', '7A'].includes(classStr);
         })
         .sort((a, b) => {
-          // Sort by class number numerically
           const numA = parseInt(a.classNumber) || 0;
           const numB = parseInt(b.classNumber) || 0;
           return numA - numB;
         });
       
       setClasses(filteredClasses);
+      return filteredClasses;
     } catch (error) {
       console.error("Error fetching classes:", error);
       toast.error("Failed to fetch classes");
+      throw error;
     }
   };
 
-  const fetchAllToppers = async () => {
+  const fetchAllToppers = async (classList) => {
     const toppersData = {};
     
-    for (const cls of classes) {
+    // Use the provided classList or fallback to state
+    const classesToProcess = classList || classes;
+    
+    if (!classesToProcess || classesToProcess.length === 0) {
+      console.log("No classes to process for toppers");
+      return;
+    }
+    
+    for (const cls of classesToProcess) {
       try {
         setClassLoading(prev => ({ ...prev, [cls._id]: true }));
         
@@ -208,6 +276,11 @@ const ResultMain = () => {
       setSearchLoading(false);
     }
   };
+
+  // Show loading screen while page is loading
+  if (pageLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -368,7 +441,7 @@ const ResultMain = () => {
                       ))}
                     </div>
 
-                    {/* Mobile Vertical List - Improved layout */}
+                    {/* Mobile Vertical List */}
                     <div className="md:hidden space-y-2">
                       {toppers[cls._id].map((student, index) => (
                         <TopperCard 
@@ -387,6 +460,13 @@ const ResultMain = () => {
               </div>
             </div>
           ))}
+
+          {/* Show message if no classes */}
+          {classes.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-sm text-gray-500">No classes available</p>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
