@@ -106,8 +106,8 @@ const TopperCard = ({ student, rank }) => {
 
           {/* Info - Now showing guardian name instead of roll number */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-xs sm:text-sm font-medium text-gray-900 truncate">{student.name}</h3>
-            <p className="text-[10px] sm:text-xs text-gray-500 truncate">
+            <h3 className="text-xs sm:text-sm font-medium text-gray-900 ">{student.name}</h3>
+            <p className="text-[10px] sm:text-xs text-gray-500 ">
               Guardian: {student.guardian || "N/A"}
             </p>
             
@@ -124,7 +124,7 @@ const TopperCard = ({ student, rank }) => {
           </div>
 
           {/* Chevron */}
-          <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+          {/* <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" /> */}
         </div>
       </div>
     </div>

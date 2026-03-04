@@ -130,18 +130,18 @@ const ResultSummaryCard = ({ student, isFailed, failedCount, minPercentage }) =>
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-2 md:gap-3 mt-4 md:mt-6">
+      <div className="grid grid-cols-3 gap-2 md:gap-3 mt-4 md:mt-6">
         <div className="bg-gray-50 rounded-lg p-2 md:p-3">
           <p className="text-[10px] md:text-xs text-gray-500 mb-0.5 md:mb-1">Overall %</p>
           <p className="text-sm md:text-lg font-semibold text-gray-800">{student.overallPercentage}%</p>
         </div>
-        <div className="bg-gray-50 rounded-lg p-2 md:p-3">
+        {/* <div className="bg-gray-50 rounded-lg p-2 md:p-3">
           <p className="text-[10px] md:text-xs text-gray-500 mb-0.5 md:mb-1">Lowest %</p>
           <p className="text-xs md:text-lg font-semibold text-gray-800">{minPercentage}%</p>
-        </div>
+        </div> */}
         <div className="bg-gray-50 rounded-lg p-2 md:p-3">
           <p className="text-[10px] md:text-xs text-gray-500 mb-0.5 md:mb-1">Rank</p>
-          <p className="text-xs md:text-lg font-semibold text-gray-800 truncate">{student.rank}</p>
+          <p className="text-xs md:text-lg font-semibold text-gray-800">{student.rank}</p>
         </div>
         <div className="bg-gray-50 rounded-lg p-2 md:p-3">
           <p className="text-[10px] md:text-xs text-gray-500 mb-0.5 md:mb-1">Status</p>
